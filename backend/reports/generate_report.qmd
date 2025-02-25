@@ -1,0 +1,136 @@
+---
+title: "225 Building Environment Report"
+author: "NEU Seattle Devs (Hot Sauce)"
+date: "February 25, 2025"
+
+# Document Configuration
+format:
+  pdf:
+    documentclass: article
+    papersize: letter
+    fontsize: 12pt
+    geometry: 
+      - margin=1in
+    number-sections: true
+    colorlinks: true
+    link-citations: true
+    
+# Execution Settings  
+execute:
+  echo: false
+  warning: false
+  error: false
+  message: false
+  fig-align: center
+
+# Page Layout and Style
+header-includes:
+  - \usepackage{fancyhdr}
+  - \pagestyle{fancy}
+  - \fancyhf{}
+  - \rhead{NEU Seattle Devs}
+  - \lhead{225 Building Environment Report}
+  - \cfoot{\thepage}
+---
+
+# Basic Monitoring Information
+
+## Sensor Details
+
+```{python}
+from datetime import datetime
+
+# Sensor Information
+sensor_info = {
+    "Date": "2/25/2025",
+    "Time Range": "8:30:20 - 12:15:01",
+    "Location": "Floor-1; Sensor#3",
+    "Sensor Status": "OK"
+}
+
+# Pretty print the sensor information
+for key, value in sensor_info.items():
+    print(f"{key}: {value}")
+```
+
+## Environmental Monitoring Chart
+
+```{python}
+import matplotlib.pyplot as plt
+import os
+
+# Sample monitoring data
+times = ['8:30', '9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00']
+temperature = [22.5, 23.1, 23.8, 24.2, 24.7, 25.0, 25.3, 25.6]
+humidity = [45, 47, 46, 44, 42, 40, 39, 38]
+co2 = [400, 450, 500, 550, 600, 650, 700, 750]
+voc = [50, 55, 60, 65, 70, 75, 80, 85]
+
+# Create the figure and plot with smaller size
+plt.figure(figsize=(8, 4))  # Reduced figure size
+
+# Plot temperature and humidity
+plt.subplot(2, 1, 1)
+plt.plot(times, temperature, label='Temperature (°C)', color='red', marker='o', markersize=4)
+plt.plot(times, humidity, label='Humidity (%)', color='blue', marker='s', markersize=4)
+plt.title('Environmental Monitoring', fontsize=10)
+plt.ylabel('Temp / Humidity', fontsize=8)
+plt.legend(fontsize=6)
+plt.grid(True, linestyle='--', linewidth=0.5)
+plt.xticks(rotation=45, fontsize=7)
+plt.yticks(fontsize=7)
+
+# Plot CO2 and VOC
+plt.subplot(2, 1, 2)
+plt.plot(times, co2, label='CO2 (ppm)', color='green', marker='^', markersize=4)
+plt.plot(times, voc, label='VOC', color='purple', marker='D', markersize=4)
+plt.xlabel('Time', fontsize=8)
+plt.ylabel('CO2 / VOC', fontsize=8)
+plt.legend(fontsize=6)
+plt.grid(True, linestyle='--', linewidth=0.5)
+plt.xticks(rotation=45, fontsize=7)
+plt.yticks(fontsize=7)
+
+# Adjust layout and save
+plt.tight_layout()
+
+# Save the plot
+plt.savefig('environmental_monitoring.png', dpi=200, bbox_inches='tight')
+plt.close()
+
+print("Environmental monitoring chart generated successfully.")
+```
+
+![Environmental Monitoring Chart](/environmental_monitoring.png)
+
+## Data Insights
+
+- **Temperature**: Ranging from 22.5°C to 25.6°C
+- **Humidity**: Ranging from 45% to 38%
+- **CO2 Levels**: Ranging from 400 ppm to 750 ppm
+- **VOC Levels**: Ranging from 50 to 85
+
+# Comfort Level
+**Comfort Categories**
+   - Excellent: 90-100
+   - Good: 75-89
+   - Moderate: 50-74
+   - Poor: 25-49
+   - Unacceptable: 0-24
+
+- Comfort Score during the selected time frame: 84 - Good
+
+
+## Anomaly Detection
+- CO2 and VOC levels show steady increase
+- Potential indicators:
+  - Increased occupancy
+  - Reduced ventilation
+  - Ongoing activities in the monitored space
+
+# Sensor Specification
+
+- **Sensor Model**: NEU Seattle Environmental Monitoring Unit v1.0
+- **Manufacturer**: ESP8266
+- **Calibration Date**: January 15, 2025
+- **Sampling Interval**: 5 minutes
