@@ -112,11 +112,11 @@ print("Environmental monitoring chart generated successfully.")
 
 # Comfort Level
 **Comfort Categories**
-   - Excellent: 90-100
-   - Good: 75-89
-   - Moderate: 50-74
-   - Poor: 25-49
-   - Unacceptable: 0-24
+ - Excellent: 90-100
+ - Good: 75-89
+ - Moderate: 50-74
+ - Poor: 25-49
+ - Unacceptable: 0-24
 
 - Comfort Score during the selected time frame: 84 - Good
 
@@ -130,7 +130,6 @@ print("Environmental monitoring chart generated successfully.")
 
 # Sensor Specification
 
-- **Sensor Model**: NEU Seattle Environmental Monitoring Unit v1.0
-- **Manufacturer**: ESP8266
+- **Sensor Models**: ESP8266, PMS5003(PM2.5), SHT31-D(Temp/Hum), S8(CO2)
 - **Calibration Date**: January 15, 2025
 - **Sampling Interval**: 5 minutes
