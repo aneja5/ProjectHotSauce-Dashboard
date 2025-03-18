@@ -1,0 +1,269 @@
+---
+title: "225 Building Environment Report"
+author: "NEU Seattle Devs (Hot Sauce)"
+date: "February 25, 2025"
+
+# Document Configuration
+format:
+  pdf:
+    documentclass: article
+    papersize: letter
+    fontsize: 12pt
+    geometry: 
+      - margin=1in
+    number-sections: true
+    colorlinks: true
+    link-citations: true
+    
+# Execution Settings  
+execute:
+  echo: false
+  warning: false
+  error: false
+  message: false
+  fig-align: center
+
+# Page Layout and Style
+header-includes:
+  - \usepackage{fancyhdr}
+  - \pagestyle{fancy}
+  - \fancyhf{}
+  - \rhead{NEU Seattle Devs}
+  - \lhead{225 Building Environment Report}
+  - \cfoot{\thepage}
+
+  # Custom H1 Dark Blue Styling
+  - \usepackage{xcolor}
+  - \definecolor{darkblue}{RGB}{32, 38, 115}
+  - \usepackage{sectsty}
+  - \sectionfont{\color{darkblue}}
+---
+
+# Basic Monitoring Information
+
+## Sensor Details
+
+```{python}
+from datetime import datetime
+
+# Sensor Information for multiple sensors
+sensor_info = [
+    {"id": "3", "Date": "2/25/2025", "Time Range": "8:30:20 - 12:15:01", "Location": "Floor-1", "Sensor Status": "OK"},
+    {"id": "5", "Date": "2/25/2025", "Time Range": "8:30:20 - 12:15:01", "Location": "Floor-2", "Sensor Status": "OK"}
+]
+
+# Print sensor information properly
+print("Sensor Information:")
+print("=" * 40)
+
+for sensor in sensor_info:
+    print(f"Sensor # {sensor['id']}:")
+    for key, value in sensor.items():
+        if key != "id":  # Exclude 'id' from the inner loop
+            print(f"  {key}: {value}")
+    print("-" * 40)  # Separator for readability
+```
+
+## Environmental Monitoring Chart
+
+# Environmental Monitoring Charts
+
+```{python}
+import matplotlib.pyplot as plt
+import os
+
+# Ensure the directory exists
+output_dir = "charts"
+os.makedirs(output_dir, exist_ok=True)  # Create if not exists
+
+# Sample data for multiple sensors
+times = ['8:30', '9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00']
+
+# Sensor 1 (Floor 1)
+temperature_1 = [76.1, 74.4, 71.2, 70.8, 72.4, 73.1, 72.4, 72.1]
+humidity_1 = [45, 47, 46, 44, 42, 40, 39, 38]
+co2_1 = [400, 450, 500, 550, 600, 650, 700, 750]
+voc_1 = [50, 55, 60, 65, 56, 71, 76, 65]
+
+# Sensor 2 (Floor 2)
+temperature_2 = [74.1, 73.4, 70.2, 71.8, 73.4, 72.1, 71.4, 70.1]
+humidity_2 = [48, 44, 45, 47, 42, 41, 39, 39]
+co2_2 = [410, 420, 510, 550, 550, 600, 670, 670]
+voc_2 = [55, 48, 58, 67, 65, 70, 75, 66]
+
+# Define function for multi-sensor chart
+def plot_multi_sensor(times, values1, values2, label, ylabel, color1, color2, filename):
+    plt.figure(figsize=(8, 4))
+    plt.plot(times, values1, label=f'Sensor 1 - {label}', color=color1, marker='o', markersize=5)
+    plt.plot(times, values2, label=f'Sensor 2 - {label}', color=color2, marker='s', markersize=5)
+    
+    plt.xlabel('Time', fontsize=10)
+    plt.ylabel(ylabel, fontsize=10)
+    plt.title(f'{label} Comparison', fontsize=12)
+    plt.legend(fontsize=8)
+    plt.grid(True, linestyle='--', linewidth=0.5)
+    plt.xticks(rotation=45, fontsize=8)
+    plt.yticks(fontsize=8)
+    
+    # Save the plot in the /charts/ directory
+    file_path = os.path.join(output_dir, filename)
+    plt.savefig(file_path, dpi=200, bbox_inches='tight')
+    plt.close()
+
+# Generate and save charts in /charts/
+plot_multi_sensor(times, temperature_1, temperature_2, 'Temperature (°F)', 'Temperature (°F)', 'red', 'orange', 'temperature_comparison.png')
+plot_multi_sensor(times, humidity_1, humidity_2, 'Humidity (%)', 'Humidity (%)', 'blue', 'cyan', 'humidity_comparison.png')
+plot_multi_sensor(times, co2_1, co2_2, 'CO2 (ppm)', 'CO2 (ppm)', 'green', 'lime', 'co2_comparison.png')
+plot_multi_sensor(times, voc_1, voc_2, 'VOC', 'VOC', 'purple', 'magenta', 'voc_comparison.png')
+
+print(f"Multi-sensor environmental monitoring charts saved in '{output_dir}/'.")
+```
+
+## Sensor Comparison Charts
+
+### Temperature Comparison
+![Temperature Comparison](/charts/temperature_comparison.png){width=80%}
+
+### Humidity Comparison
+![Humidity Comparison](/charts/humidity_comparison.png){width=80%}
+
+### CO2 Comparison
+![CO2 Comparison](/charts/co2_comparison.png){width=80%}
+
+### VOC Comparison
+![VOC Comparison](/charts/voc_comparison.png){width=80%}
+
+## Data Insights
+
+- **Temperature**: Ranging from 22.5°C to 25.6°C
+- **Humidity**: Ranging from 45% to 38%
+- **CO2 Levels**: Ranging from 400 ppm to 750 ppm
+- **VOC Levels**: Ranging from 50 to 85
+
+# Comfort Level
+**Comfort Scores**
+
+```{python}
+import numpy as np
+
+# Sample sensor data (replace with queried values)
+sensor_data = {
+    "temperature": [72.5, 73.6, 74.8, 75.6, 76.5, 77.0, 77.5, 78.1],  # °F
+    "humidity": [45, 47, 46, 44, 42, 40, 39, 38],  # %
+    "co2": [400, 450, 500, 550, 600, 650, 700, 750],  # ppm
+    "voc": [50, 55, 60, 65, 70, 75, 80, 85]  # VOC index
+}
+
+# Define ideal ranges in Fahrenheit
+temp_range_f = (70, 77)  # °F 
+humidity_range = (40, 60)  # %
+co2_thresholds = [600, 1000]  # ppm
+voc_thresholds = [50, 150]  # VOC Index
+
+# Function to calculate individual metric scores
+def score_temperature(temp):
+    if temp_range_f[0] <= temp <= temp_range_f[1]:
+        return 100
+    elif temp < temp_range_f[0]:
+        return 75 - (temp_range_f[0] - temp) * 2  # Penalize cold
+    else:
+        return 75 - (temp - temp_range_f[1]) * 2  # Penalize hot
+
+def score_humidity(hum):
+    if humidity_range[0] <= hum <= humidity_range[1]:
+        return 100
+    elif hum < humidity_range[0]:
+        return 75 - (humidity_range[0] - hum) * 2
+    else:
+        return 75 - (hum - humidity_range[1]) * 2
+
+def score_co2(co2):
+    if co2 <= co2_thresholds[0]:
+        return 100
+    elif co2 <= co2_thresholds[1]:
+        return 75 - ((co2 - co2_thresholds[0]) / (co2_thresholds[1] - co2_thresholds[0])) * 25
+    else:
+        return 50 - ((co2 - co2_thresholds[1]) / 500) * 25  # Severe penalty for high CO2
+
+def score_voc(voc):
+    if voc <= voc_thresholds[0]:
+        return 100
+    elif voc <= voc_thresholds[1]:
+        return 75 - ((voc - voc_thresholds[0]) / (voc_thresholds[1] - voc_thresholds[0])) * 25
+    else:
+        return 50 - ((voc - voc_thresholds[1]) / 100) * 25  # Severe penalty for high VOC
+
+# Compute average scores for each metric
+temp_scores = np.mean([score_temperature(t) for t in sensor_data["temperature"]])
+humidity_scores = np.mean([score_humidity(h) for h in sensor_data["humidity"]])
+co2_scores = np.mean([score_co2(c) for c in sensor_data["co2"]])
+voc_scores = np.mean([score_voc(v) for v in sensor_data["voc"]])
+
+# Weighted Comfort Score
+weights = {"temp": 0.3, "humidity": 0.3, "co2": 0.2, "voc": 0.2}
+comfort_score = (
+    temp_scores * weights["temp"] +
+    humidity_scores * weights["humidity"] +
+    co2_scores * weights["co2"] +
+    voc_scores * weights["voc"]
+)
+
+# Categorize the comfort level
+def categorize_comfort(score):
+    if score >= 90:
+        return "Excellent"
+    elif score >= 75:
+        return "Good"
+    elif score >= 50:
+        return "Moderate"
+    elif score >= 25:
+        return "Poor"
+    else:
+        return "Unacceptable"
+
+comfort_category = categorize_comfort(comfort_score)
+
+# Print results
+print(f"Comfort Score: {comfort_score:.2f} ({comfort_category})")
+```
+
+
+
+
+**Comfort Levels**
+
+-	Excellent (90-100) ✅ – Ideal indoor environment
+
+-	Good (75-89) 🙂 – Comfortable but slightly off-optimal
+
+-	Moderate (50-74) 😐 – Some discomfort noticeable
+
+-	Poor (25-49) 😕 – Significant discomfort or air quality concerns
+
+-	Unacceptable (0-24) ❌ – Unhealthy indoor conditions
+
+**Comfort Categories**
+
+1.	Temperature (°F) – Ideal indoor temperatures typically range between 69.8°F and 77°F for comfort.
+
+2.	Humidity (%) – Optimal indoor humidity falls between 40% and 60% to maintain comfort and air quality.
+
+3.	CO₂ Levels (ppm) – Higher CO₂ levels can indicate poor ventilation. Readings below 600 ppm are ideal, while values above 1000 ppm suggest poor air circulation.
+
+4.	VOC Levels – Volatile Organic Compounds (VOCs) affect air quality, with values below 50 considered excellent and those above 150 potentially harmful.
+
+
+
+
+## Anomaly Detection -> for later dev
+- CO2 and VOC levels show steady increase
+- Potential indicators:
+  - Increased occupancy
+  - Reduced ventilation
+  - Ongoing activities in the monitored space
+
+# Sensor Specification
+
+- **Sensor Models**: ESP8266, PMS5003(PM2.5), SHT31-D(Temp/Hum), S8(CO2)
+- **Calibration Date**: January 15, 2025
+- **Sampling Interval**: 5 minutes

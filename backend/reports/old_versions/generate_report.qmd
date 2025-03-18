@@ -121,7 +121,7 @@ print("Environmental monitoring chart generated successfully.")
 - Comfort Score during the selected time frame: 84 - Good
 
 
-## Anomaly Detection
+## Anomaly Detection -> for later dev
 - CO2 and VOC levels show steady increase
 - Potential indicators:
   - Increased occupancy
