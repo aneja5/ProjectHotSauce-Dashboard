@@ -44,24 +44,30 @@ header-includes:
 ## Sensor Details
 
 ```{python}
+import boto3
+import pandas as pd
 from datetime import datetime
 
-# Sensor Information for multiple sensors
-sensor_info = [
-    {"id": "3", "Date": "2/25/2025", "Time Range": "8:30:20 - 12:15:01", "Location": "Floor-1", "Sensor Status": "OK"},
-    {"id": "5", "Date": "2/25/2025", "Time Range": "8:30:20 - 12:15:01", "Location": "Floor-2", "Sensor Status": "OK"}
-]
+# AWS Configuration
+dynamodb = boto3.resource('dynamodb')
+table_name = 'YourDynamoDBTable'
+table = dynamodb.Table(table_name)
 
-# Print sensor information properly
-print("Sensor Information:")
-print("=" * 40)
+# Define time range (e.g., last 4 hours)
+current_time = datetime.utcnow()
+start_time = current_time.strftime('%Y-%m-%dT%H:%M:%SZ')
 
-for sensor in sensor_info:
-    print(f"Sensor # {sensor['id']}:")
-    for key, value in sensor.items():
-        if key != "id":  # Exclude 'id' from the inner loop
-            print(f"  {key}: {value}")
-    print("-" * 40)  # Separator for readability
+# Query the data (adjust filter as needed)
+response = table.scan()  # For all data; use query() with KeyConditionExpression for efficiency
+
+# Convert to DataFrame
+sensor_data = pd.DataFrame(response['Items'])
+
+# Ensure correct data types
+sensor_data['timestamp'] = pd.to_datetime(sensor_data['timestamp'])
+
+# Display the latest 10 records (debugging)
+print(sensor_data.tail(10))
 ```
 
 ## Environmental Monitoring Chart
@@ -70,53 +76,42 @@ for sensor in sensor_info:
 
 ```{python}
 import matplotlib.pyplot as plt
-import os
 
-# Ensure the directory exists
-output_dir = "charts"
-os.makedirs(output_dir, exist_ok=True)  # Create if not exists
+# Extract latest data per sensor
+latest_data = sensor_data.sort_values(by="timestamp", ascending=False).groupby("sensor_id").first().reset_index()
 
-# Sample data for multiple sensors
-times = ['8:30', '9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00']
+# Print to validate
+print(latest_data[["sensor_id", "temperature", "humidity", "co2", "voc"]])
 
-# Sensor 1 (Floor 1)
-temperature_1 = [76.1, 74.4, 71.2, 70.8, 72.4, 73.1, 72.4, 72.1]
-humidity_1 = [45, 47, 46, 44, 42, 40, 39, 38]
-co2_1 = [400, 450, 500, 550, 600, 650, 700, 750]
-voc_1 = [50, 55, 60, 65, 56, 71, 76, 65]
+# Generate table for Quarto
+sensor_info = latest_data.to_dict(orient="records")
 
-# Sensor 2 (Floor 2)
-temperature_2 = [74.1, 73.4, 70.2, 71.8, 73.4, 72.1, 71.4, 70.1]
-humidity_2 = [48, 44, 45, 47, 42, 41, 39, 39]
-co2_2 = [410, 420, 510, 550, 550, 600, 670, 670]
-voc_2 = [55, 48, 58, 67, 65, 70, 75, 66]
+for sensor in sensor_info:
+    print(f"Sensor #{sensor['sensor_id']}:")
+    print(f"  Temperature: {sensor['temperature']}°F")
+    print(f"  Humidity: {sensor['humidity']}%")
+    print(f"  CO₂ Level: {sensor['co2']} ppm")
+    print(f"  VOC Index: {sensor['voc']}")
+    print("-" * 40)
 
-# Define function for multi-sensor chart
-def plot_multi_sensor(times, values1, values2, label, ylabel, color1, color2, filename):
-    plt.figure(figsize=(8, 4))
-    plt.plot(times, values1, label=f'Sensor 1 - {label}', color=color1, marker='o', markersize=5)
-    plt.plot(times, values2, label=f'Sensor 2 - {label}', color=color2, marker='s', markersize=5)
-    
-    plt.xlabel('Time', fontsize=10)
-    plt.ylabel(ylabel, fontsize=10)
-    plt.title(f'{label} Comparison', fontsize=12)
-    plt.legend(fontsize=8)
-    plt.grid(True, linestyle='--', linewidth=0.5)
-    plt.xticks(rotation=45, fontsize=8)
-    plt.yticks(fontsize=8)
-    
-    # Save the plot in the /charts/ directory
-    file_path = os.path.join(output_dir, filename)
-    plt.savefig(file_path, dpi=200, bbox_inches='tight')
-    plt.close()
 
-# Generate and save charts in /charts/
-plot_multi_sensor(times, temperature_1, temperature_2, 'Temperature (°F)', 'Temperature (°F)', 'red', 'orange', 'temperature_comparison.png')
-plot_multi_sensor(times, humidity_1, humidity_2, 'Humidity (%)', 'Humidity (%)', 'blue', 'cyan', 'humidity_comparison.png')
-plot_multi_sensor(times, co2_1, co2_2, 'CO2 (ppm)', 'CO2 (ppm)', 'green', 'lime', 'co2_comparison.png')
-plot_multi_sensor(times, voc_1, voc_2, 'VOC', 'VOC', 'purple', 'magenta', 'voc_comparison.png')
+# Ensure sorted timestamps
+sensor_data = sensor_data.sort_values(by="timestamp")
 
-print(f"Multi-sensor environmental monitoring charts saved in '{output_dir}/'.")
+# Plot temperature over time for each sensor
+plt.figure(figsize=(8, 4))
+for sensor_id, df in sensor_data.groupby("sensor_id"):
+    plt.plot(df["timestamp"], df["temperature"], label=f"Sensor {sensor_id}")
+
+plt.xlabel("Time")
+plt.ylabel("Temperature (°F)")
+plt.title("Real-time Temperature Trends")
+plt.legend()
+plt.grid(True, linestyle="--", linewidth=0.5)
+plt.xticks(rotation=45)
+
+plt.savefig("charts/real_temperature_trends.png", dpi=200, bbox_inches="tight")
+plt.close()
 ```
 
 ## Sensor Comparison Charts
