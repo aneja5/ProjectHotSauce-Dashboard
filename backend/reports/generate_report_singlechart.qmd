@@ -52,6 +52,7 @@ sensor_info = [
     {"id": "5", "Date": "2/25/2025", "Time Range": "8:30:20 - 12:15:01", "Location": "Floor-2", "Sensor Status": "OK"}
 ]
 
+
 # Print sensor information properly
 print("Sensor Information:")
 print("=" * 40)
@@ -139,13 +140,12 @@ print(f"Multi-sensor environmental monitoring charts saved in '{output_dir}/'.")
 
 # TODO: get range of data
 
-```
+print(f"**Temperature**: ranging from {min(temperature_1)}° F to {max(temperature_1)}° F")
+print(f"**Humidity**: ranging from {min(temperature_1)}° F to {max(temperature_1)}° F")
+print(f"**CO2 Levels**: ranging from {min(temperature_1)}° F to {max(temperature_1)}° F")
+print(f"**PM 2.5 Levels**: ranging from {min(temperature_1)}° F to {max(temperature_1)}° F")
 
-#### DUMMY data:
-- **Temperature**: Ranging from 68.5 F to 75.6° F
-- **Humidity**: Ranging from 45% to 58%
-- **CO2 Levels**: Ranging from 400 ppm to 750 ppm
-- **PM 2.5 Levels**: Ranging from 11 to 25
+```
 
 # Comfort Level
 **Comfort Scores**
