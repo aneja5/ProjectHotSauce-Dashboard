@@ -83,13 +83,13 @@ times = ['8:30', '9:00', '9:30', '10:00', '10:30', '11:00', '11:30', '12:00']
 temperature_1 = [76.1, 74.4, 71.2, 70.8, 72.4, 73.1, 72.4, 72.1]
 humidity_1 = [45, 47, 46, 44, 42, 40, 39, 38]
 co2_1 = [400, 450, 500, 550, 600, 650, 700, 750]
-voc_1 = [50, 55, 60, 65, 56, 71, 76, 65]
+pm_1 = [12, 14.5, 11, 15, 11.2, 17, 16, 12]
 
 # Sensor 2 (Floor 2)
 temperature_2 = [74.1, 73.4, 70.2, 71.8, 73.4, 72.1, 71.4, 70.1]
 humidity_2 = [48, 44, 45, 47, 42, 41, 39, 39]
 co2_2 = [410, 420, 510, 550, 550, 600, 670, 670]
-voc_2 = [55, 48, 58, 67, 65, 70, 75, 66]
+pm_2 = [15, 13.5, 12, 13, 15.2, 17, 13, 11]
 
 # Define function for multi-sensor chart
 def plot_multi_sensor(times, values1, values2, label, ylabel, color1, color2, filename):
@@ -114,7 +114,7 @@ def plot_multi_sensor(times, values1, values2, label, ylabel, color1, color2, fi
 plot_multi_sensor(times, temperature_1, temperature_2, 'Temperature (°F)', 'Temperature (°F)', 'red', 'orange', 'temperature_comparison.png')
 plot_multi_sensor(times, humidity_1, humidity_2, 'Humidity (%)', 'Humidity (%)', 'blue', 'cyan', 'humidity_comparison.png')
 plot_multi_sensor(times, co2_1, co2_2, 'CO2 (ppm)', 'CO2 (ppm)', 'green', 'lime', 'co2_comparison.png')
-plot_multi_sensor(times, voc_1, voc_2, 'VOC', 'VOC', 'purple', 'magenta', 'voc_comparison.png')
+plot_multi_sensor(times, pm_1, pm_2, 'PM2.5', 'PM2.5', 'purple', 'magenta', 'pm_comparison.png')
 
 print(f"Multi-sensor environmental monitoring charts saved in '{output_dir}/'.")
 ```
@@ -130,15 +130,22 @@ print(f"Multi-sensor environmental monitoring charts saved in '{output_dir}/'.")
 ### CO2 Comparison
 ![CO2 Comparison](/charts/co2_comparison.png){width=80%}
 
-### VOC Comparison
-![VOC Comparison](/charts/voc_comparison.png){width=80%}
+### PM 2.5 Comparison
+![PM2.5 Comparison](/charts/pm_comparison.png){width=80%}
 
 ## Data Insights
 
-- **Temperature**: Ranging from 22.5°C to 25.6°C
-- **Humidity**: Ranging from 45% to 38%
+```{python}
+
+# TODO: get range of data
+
+```
+
+#### DUMMY data:
+- **Temperature**: Ranging from 68.5 F to 75.6° F
+- **Humidity**: Ranging from 45% to 58%
 - **CO2 Levels**: Ranging from 400 ppm to 750 ppm
-- **VOC Levels**: Ranging from 50 to 85
+- **PM 2.5 Levels**: Ranging from 11 to 25
 
 # Comfort Level
 **Comfort Scores**
@@ -146,85 +153,39 @@ print(f"Multi-sensor environmental monitoring charts saved in '{output_dir}/'.")
 ```{python}
 import numpy as np
 
-# Sample sensor data (replace with queried values)
+def calculate_penalty(value, optimal_range, penalty_factor):
+    if optimal_range[0] <= value <= optimal_range[1]:
+        return 0
+    return abs(value - sum(optimal_range) / 2) * penalty_factor
+
+def calculate_ics(sensor_data):
+    weights = {"temperature": 0.3, "humidity": 0.2, "co2": 0.3, "pm2.5": 0.2}
+    optimal_ranges = {"temperature": (68, 77), "humidity": (40, 60), "co2": (400, 800), "pm2.5": (0, 12)}
+    penalty_factors = {"temperature": 5, "humidity": 2, "co2": 1 / 10, "pm2.5": 2}
+    
+    scores = []
+    for i in range(len(sensor_data["temperature"])):
+        penalties = {
+            key: calculate_penalty(sensor_data[key][i], optimal_ranges[key], penalty_factors[key])
+            for key in sensor_data
+        }
+        ics = 100 - sum(weights[key] * penalties[key] for key in sensor_data)
+        scores.append(round(ics, 2))
+    avg_scores = round(sum(scores)/len(scores), 2)
+    
+    return avg_scores
+
+
+# Sample sensor data
 sensor_data = {
     "temperature": [72.5, 73.6, 74.8, 75.6, 76.5, 77.0, 77.5, 78.1],  # °F
     "humidity": [45, 47, 46, 44, 42, 40, 39, 38],  # %
     "co2": [400, 450, 500, 550, 600, 650, 700, 750],  # ppm
-    "voc": [50, 55, 60, 65, 70, 75, 80, 85]  # VOC index
+    "pm2.5": [12, 11, 24, 22, 14, 30, 35, 24]  # PM 2.5 index
 }
 
-# Define ideal ranges in Fahrenheit
-temp_range_f = (70, 77)  # °F 
-humidity_range = (40, 60)  # %
-co2_thresholds = [600, 1000]  # ppm
-voc_thresholds = [50, 150]  # VOC Index
-
-# Function to calculate individual metric scores
-def score_temperature(temp):
-    if temp_range_f[0] <= temp <= temp_range_f[1]:
-        return 100
-    elif temp < temp_range_f[0]:
-        return 75 - (temp_range_f[0] - temp) * 2  # Penalize cold
-    else:
-        return 75 - (temp - temp_range_f[1]) * 2  # Penalize hot
-
-def score_humidity(hum):
-    if humidity_range[0] <= hum <= humidity_range[1]:
-        return 100
-    elif hum < humidity_range[0]:
-        return 75 - (humidity_range[0] - hum) * 2
-    else:
-        return 75 - (hum - humidity_range[1]) * 2
-
-def score_co2(co2):
-    if co2 <= co2_thresholds[0]:
-        return 100
-    elif co2 <= co2_thresholds[1]:
-        return 75 - ((co2 - co2_thresholds[0]) / (co2_thresholds[1] - co2_thresholds[0])) * 25
-    else:
-        return 50 - ((co2 - co2_thresholds[1]) / 500) * 25  # Severe penalty for high CO2
-
-def score_voc(voc):
-    if voc <= voc_thresholds[0]:
-        return 100
-    elif voc <= voc_thresholds[1]:
-        return 75 - ((voc - voc_thresholds[0]) / (voc_thresholds[1] - voc_thresholds[0])) * 25
-    else:
-        return 50 - ((voc - voc_thresholds[1]) / 100) * 25  # Severe penalty for high VOC
-
-# Compute average scores for each metric
-temp_scores = np.mean([score_temperature(t) for t in sensor_data["temperature"]])
-humidity_scores = np.mean([score_humidity(h) for h in sensor_data["humidity"]])
-co2_scores = np.mean([score_co2(c) for c in sensor_data["co2"]])
-voc_scores = np.mean([score_voc(v) for v in sensor_data["voc"]])
-
-# Weighted Comfort Score
-weights = {"temp": 0.3, "humidity": 0.3, "co2": 0.2, "voc": 0.2}
-comfort_score = (
-    temp_scores * weights["temp"] +
-    humidity_scores * weights["humidity"] +
-    co2_scores * weights["co2"] +
-    voc_scores * weights["voc"]
-)
-
-# Categorize the comfort level
-def categorize_comfort(score):
-    if score >= 90:
-        return "Excellent"
-    elif score >= 75:
-        return "Good"
-    elif score >= 50:
-        return "Moderate"
-    elif score >= 25:
-        return "Poor"
-    else:
-        return "Unacceptable"
-
-comfort_category = categorize_comfort(comfort_score)
-
-# Print results
-print(f"Comfort Score: {comfort_score:.2f} ({comfort_category})")
+ics_scores = calculate_ics(sensor_data)
+print("Indoor Comfort Scores:", ics_scores)
 ```
 
 
@@ -250,13 +211,13 @@ print(f"Comfort Score: {comfort_score:.2f} ({comfort_category})")
 
 3.	CO₂ Levels (ppm) – Higher CO₂ levels can indicate poor ventilation. Readings below 600 ppm are ideal, while values above 1000 ppm suggest poor air circulation.
 
-4.	VOC Levels – Volatile Organic Compounds (VOCs) affect air quality, with values below 50 considered excellent and those above 150 potentially harmful.
+4.	PM 2.5 (µg/m³) – Ideal indoor PM 2.5 levels should remain below 12 µg/m³. Levels exceeding 35 µg/m³ are considered unhealthy, especially for sensitive groups.
 
 
 
 
 ## Anomaly Detection -> for later dev
-- CO2 and VOC levels show steady increase
+- CO2 and PM2.5 levels show steady increase
 - Potential indicators:
   - Increased occupancy
   - Reduced ventilation
